@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أَنْشِطَتِي الْيَوْمِيَّةُ - Mes activités quotidiennes</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Polices Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdf4; /* emerald-50 */
+            color: #1f2937;
+        }
+        
+        .arabic-text {
+            font-family: 'Noto Naskh Arabic', serif;
+            direction: rtl;
+            text-align: right;
+            line-height: 1.8;
+        }
+
+        .card-hover {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes bounce-short {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-bounce-short {
+            animation: bounce-short 0.5s ease-in-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body>
+
+    <div id="app"></div>
+
+    <script>
+        // --- DONNÉES PÉDAGOGIQUES ---
+        const VOCABULARY = [
+            { id: 'v1', ar: 'أَسْتَيْقِظُ', fr: 'Je me réveille', moment: 'matin', icon: '🥱' },
+            { id: 'v2', ar: 'أَغْسِلُ وَجْهِي', fr: 'Je me lave le visage', moment: 'matin', icon: '🧼' },
+            { id: 'v3', ar: 'أَتَنَاوَلُ الْفَطُورَ', fr: 'Je prends le petit-déjeuner', moment: 'matin', icon: '🥐' },
+            { id: 'v4', ar: 'أَذْهَبُ إِلَى الْمَدْرَسَةِ', fr: 'Je vais à l\'école', moment: 'matin', icon: '🎒' },
+            { id: 'v5', ar: 'أَرْجِعُ مِنَ الْمَدْرَسَةِ', fr: 'Je rentre de l\'école', moment: 'apres-midi', icon: '🏠' },
+            { id: 'v6', ar: 'أَتَغَدَّى', fr: 'Je déjeune', moment: 'apres-midi', icon: '🍽️' },
+            { id: 'v7', ar: 'أَدْرُسُ', fr: 'J\'étudie', moment: 'apres-midi', icon: '📚' },
+            { id: 'v8', ar: 'أَلْعَبُ', fr: 'Je joue', moment: 'apres-midi', icon: '⚽' },
+            { id: 'v9', ar: 'أُشَاهِدُ التِّلْفَازَ', fr: 'Je regarde la télévision', moment: 'soir', icon: '📺' },
+            { id: 'v10', ar: 'أَقْرَأُ كِتَابًا', fr: 'Je lis un livre', moment: 'soir', icon: '📖' },
+            { id: 'v11', ar: 'أَتَنَاوَلُ الْعَشَاءَ', fr: 'Je dîne', moment: 'soir', icon: '🍲' },
+            { id: 'v12', ar: 'أُحَضِّرُ حَقِيبَتِي', fr: 'Je prépare mon cartable', moment: 'nuit', icon: '🎒' },
+            { id: 'v13', ar: 'أَغْسِلُ أَسْنَانِي', fr: 'Je me brosse les dents', moment: 'nuit', icon: '🪥' },
+            { id: 'v14', ar: 'أَنَامُ', fr: 'Je dors', moment: 'nuit', icon: '🛌' }
+        ];
+
+        const STORY = [
+            {
+                id: 'p1',
+                title: 'فِي الصَّبَاحِ',
+                text: 'فِي الصَّبَاحِ، أَسْتَيْقِظُ فِي السَّاعَةِ السَّابِعَةِ. أَغْسِلُ وَجْهِي وَأُنَظِّفُ أَسْنَانِي. أَتَنَاوَلُ الْفَطُورَ اللَّذِيذَ مَعَ أُسْرَتِي، ثُمَّ أَذْهَبُ إِلَى الْمَدْرَسَةِ نَشِيطًا.',
+                questions: [
+                    { q: 'مَتَى يَسْتَيْقِظُ الْوَلَدُ؟', options: ['فِي السَّاعَةِ السَّابِعَةِ.', 'فِي السَّاعَةِ التَّاسِعَةِ.', 'فِي السَّاعَةِ الْعَاشِرَةِ.'], correct: 0 },
+                    { q: 'أَيْنَ يَذْهَبُ فِي الصَّبَاحِ؟', options: ['إِلَى السَّرِيرِ.', 'إِلَى الْمَطْبَخِ.', 'إِلَى الْمَدْرَسَةِ.'], correct: 2 }
+                ]
+            },
+            {
+                id: 'p2',
+                title: 'بَعْدَ الظُّهْرِ',
+                text: 'بَعْدَ الظُّهْرِ، أَرْجِعُ مِنَ الْمَدْرَسَةِ. أَغْسِلُ يَدَيَّ وَأَتَغَدَّى. بَعْدَ ذَلِكَ، أَجْلِسُ فِي غُرْفَتِي، أَدْرُسُ دُرُوسِي وَأَكْتُبُ وَاجِبَاتِي، ثُمَّ أَلْعَبُ قَلِيلًا.',
+                questions: [
+                    { q: 'مَاذَا يَفْعَلُ بَعْدَ الْمَدْرَسَةِ؟', options: ['يَنَامُ.', 'يَتَغَدَّى وَيَدْرُسُ.', 'يُشَاهِدُ التِّلْفَازَ.'], correct: 1 }
+                ]
+            },
+            {
+                id: 'p3',
+                title: 'فِي الْمَسَاءِ',
+                text: 'فِي الْمَسَاءِ، أَجْلِسُ مَعَ أُسْرَتِي فِي غُرْفَةِ الْجُلُوسِ. أُشَاهِدُ التِّلْفَازَ بَعْضَ الْوَقْتِ وَأَقْرَأُ كِتَابًا مُفِيدًا. نَتَنَاوَلُ الْعَشَاءَ مَعًا.',
+                questions: [
+                    { q: 'أَيْنَ يَجْلِسُ مَعَ أُسْرَتِهِ؟', options: ['فِي غُرْفَةِ النَّوْمِ.', 'فِي الْمَطْبَخِ.', 'فِي غُرْفَةِ الْجُلُوسِ.'], correct: 2 },
+                    { q: 'هَلْ يَقْرَأُ كِتَابًا فِي الْمَسَاءِ؟', options: ['نَعَمْ.', 'لَا.'], correct: 0 }
+                ]
+            },
+            {
+                id: 'p4',
+                title: 'فِي اللَّيْلِ',
+                text: 'فِي اللَّيْلِ، أُحَضِّرُ حَقِيبَتِي لِلْيَوْمِ التَّالِي. أَغْسِلُ أَسْنَانِي جَيِّدًا. أَرْتَدِي مَلَابِسَ النَّوْمِ وَأَنَامُ مُبَكِّرًا لِأَرْتَاحَ.',
+                questions: [
+                    { q: 'مَاذَا يَفْعَلُ قَبْلَ النَّوْمِ؟', options: ['يَلْعَبُ.', 'يَغْسِلُ أَسْنَانَهُ.', 'يَأْكُلُ.'], correct: 1 }
+                ]
+            }
+        ];
+
+        const SENTENCES_TO_BUILD = [
+            { fr: "Je vais à l'école le matin.", words: ['أَذْهَبُ', 'إِلَى', 'الْمَدْرَسَةِ', 'فِي', 'الصَّبَاحِ'] },
+            { fr: "J'étudie dans ma chambre.", words: ['أَدْرُسُ', 'فِي', 'غُرْفَتِي'] },
+            { fr: "Je me réveille à sept heures.", words: ['أَسْتَيْقِظُ', 'فِي', 'السَّاعَةِ', 'السَّابِعَةِ'] }
+        ];
+
+        const INITIAL_PROGRESS = {
+            vocab: { score: 0, completed: false },
+            moments: { score: 0, completed: false },
+            clock: { score: 0, completed: false },
+            reading: { score: 0, completed: false },
+            builder: { score: 0, completed: false },
+            final: { score: 0, completed: false }
+        };
+
+        const STORAGE_KEY = 'arabic_learning_profile_v3_html';
+
+        // --- UTILITAIRES ---
+        const speakArabic = (text) => {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); 
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ar-SA';
+                
+                // Forcer la recherche d'une voix arabe
+                const voices = window.speechSynthesis.getVoices();
+                let arabicVoice = voices.find(v => v.lang.startsWith('ar') || v.name.toLowerCase().includes('arabic'));
+                if (arabicVoice) {
+                    utterance.voice = arabicVoice;
+                }
+                
+                utterance.rate = 0.75; 
+                window.speechSynthesis.speak(utterance);
+            }
+        };
+
+        // Assurer le chargement des voix au démarrage
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+        }
+
+        const shuffleArray = (array) => {
+            const newArr = [...array];
+            for (let i = newArr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+            }
+            return newArr;
+        };
+
+        // --- MOTEUR DE L'APPLICATION ---
+        const App = {
+            state: {
+                progress: { ...INITIAL_PROGRESS },
+                currentView: 'login',
+                mod: {} // État spécifique au module en cours
+            },
+
+            init() {
+                this.loadProgress();
+                this.render();
+            },
+
+            loadProgress() {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    try {
+                        this.state.progress = JSON.parse(saved);
+                    } catch (e) { console.error(e); }
+                }
+            },
+
+            saveProgress() {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state.progress));
+            },
+
+            updateProgress(moduleId, score) {
+                this.state.progress[moduleId] = { score, completed: true };
+                this.saveProgress();
+            },
+
+            resetProgress() {
+                if(confirm("Veux-tu vraiment effacer toute ta progression ?")) {
+                    this.state.progress = { ...INITIAL_PROGRESS };
+                    this.saveProgress();
+                    this.render();
+                }
+            },
+
+            setView(view) {
+                this.state.currentView = view;
+                this.render();
+            },
+
+            startModule(moduleId) {
+                this.state.mod = { index: 0, score: 0, completed: false, feedback: null };
+                
+                // Préparations spécifiques selon le module
+                if(moduleId === 'module_moments') {
+                    this.state.mod.activities = shuffleArray(VOCABULARY).slice(0, 8);
+                } else if(moduleId === 'module_clock') {
+                    const times = [
+                        { hour: 7, ar: 'السَّاعَةُ السَّابِعَةُ', fr: 'Sept heures' },
+                        { hour: 8, ar: 'السَّاعَةُ الثَّامِنَةُ', fr: 'Huit heures' },
+                        { hour: 10, ar: 'السَّاعَةُ الْعَاشِرَةُ', fr: 'Dix heures' },
+                        { hour: 12, ar: 'السَّاعَةُ الثَّانِيَةَ عَشْرَةَ', fr: 'Douze heures (Midi)' },
+                        { hour: 4, ar: 'السَّاعَةُ الرَّابِعَةُ', fr: 'Quatre heures' }
+                    ];
+                    this.state.mod.questions = shuffleArray(times);
+                    this.state.mod.times = times;
+                    this.generateClockOptions();
+                } else if(moduleId === 'module_reading') {
+                    this.state.mod.showQuestion = false;
+                } else if(moduleId === 'module_builder') {
+                    this.setupBuilderSentence();
+                }
+
+                this.setView(moduleId);
+            },
+
+            // --- RENDU PRINCIPAL ---
+            render() {
+                const appDiv = document.getElementById('app');
+                if (this.state.currentView === 'login') {
+                    appDiv.innerHTML = this.renderLogin();
+                } else {
+                    appDiv.innerHTML = `
+                        <div class="min-h-screen pb-12">
+                            ${this.renderHeader()}
+                            <main class="max-w-5xl mx-auto p-4 mt-6">
+                                ${this.renderCurrentView()}
+                            </main>
+                        </div>
+                    `;
+                }
+            },
+
+            renderHeader() {
+                const isDashboard = this.state.currentView === 'dashboard';
+                return `
+                <header class="bg-white shadow-sm p-4 sticky top-0 z-50">
+                    <div class="max-w-5xl mx-auto flex justify-between items-center">
+                        <div class="flex items-center gap-4">
+                            ${!isDashboard ? `
+                            <button onclick="App.setView('dashboard')" class="flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-bold px-3 py-2 rounded-lg hover:bg-emerald-50 transition-colors">
+                                <i class="fa-solid fa-house"></i> Accueil
+                            </button>
+                            ` : ''}
+                            <h1 class="text-xl font-bold text-gray-800 hidden sm:block">
+                                أَنْشِطَتِي الْيَوْمِيَّةُ <span class="text-sm font-normal text-gray-500 ml-2">Mes activités quotidiennes</span>
+                            </h1>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-2 bg-emerald-100 text-emerald-800 px-4 py-2 rounded-full font-bold">
+                                <i class="fa-solid fa-user"></i> Mon Profil
+                            </div>
+                        </div>
+                    </div>
+                </header>`;
+            },
+
+            renderCurrentView() {
+                switch(this.state.currentView) {
+                    case 'dashboard': return this.renderDashboard();
+                    case 'module_vocab': return this.renderVocab();
+                    case 'module_moments': return this.renderMoments();
+                    case 'module_clock': return this.renderClock();
+                    case 'module_reading': return this.renderReading();
+                    case 'module_builder': return this.renderBuilder();
+                    case 'module_final': return this.renderFinal();
+                    default: return '';
+                }
+            },
+
+            renderModuleContainer(title, content) {
+                return `
+                <div class="animate-fade-in">
+                    <div class="flex items-center gap-4 mb-8">
+                        <button onclick="App.setView('dashboard')" class="p-3 bg-white rounded-full shadow-sm hover:bg-gray-50 text-gray-500 transition-colors">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <h2 class="text-2xl font-bold text-gray-800">${title}</h2>
+                    </div>
+                    <div class="min-h-[60vh]">
+                        ${content}
+                    </div>
+                </div>`;
+            },
+
+            renderSuccess(score, message) {
+                return `
+                <div class="flex flex-col items-center justify-center h-full min-h-[50vh] text-center animate-fade-in">
+                    <div class="bg-white p-12 rounded-3xl shadow-xl max-w-lg w-full">
+                        <div class="text-6xl mb-6">🏆</div>
+                        <h2 class="text-3xl font-bold text-emerald-600 mb-4">Module terminé !</h2>
+                        <p class="text-xl text-gray-700 mb-8">${message}</p>
+                        <button onclick="App.setView('dashboard')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-8 rounded-full shadow-md text-lg">
+                            Retour à l'accueil
+                        </button>
+                    </div>
+                </div>`;
+            },
+
+            // --- VUES SPÉCIFIQUES ---
+
+            renderLogin() {
+                return `
+                <div class="min-h-screen bg-gradient-to-br from-emerald-100 to-teal-50 flex flex-col items-center justify-center p-6">
+                    <div class="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full text-center">
+                        <h1 class="text-4xl text-emerald-600 mb-2 arabic-text font-bold text-center w-full">أَهْلًا بِكُمْ!</h1>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-8">Bienvenue sur ton espace d'arabe</h2>
+                        <button onclick="App.setView('dashboard')" class="flex flex-col items-center justify-center gap-3 p-6 bg-emerald-50 border-2 border-emerald-200 rounded-2xl hover:bg-emerald-500 hover:text-white hover:border-emerald-600 transition-all card-hover group w-full mx-auto">
+                            <div class="w-16 h-16 bg-emerald-200 text-emerald-700 rounded-full flex items-center justify-center group-hover:bg-white transition-colors">
+                                <i class="fa-solid fa-play text-2xl ml-1"></i>
+                            </div>
+                            <span class="font-bold text-lg">Commencer</span>
+                        </button>
+                    </div>
+                </div>`;
+            },
+
+            renderDashboard() {
+                const modules = [
+                    { id: 'module_vocab', title: '1. Les mots de la journée', desc: 'Découvre le vocabulaire', icon: 'fa-book-open text-blue-500', color: 'bg-blue-50 border-blue-200 hover:border-blue-400', key: 'vocab' },
+                    { id: 'module_moments', title: '2. Le bon moment', desc: 'Matin, soir ou nuit ?', icon: 'fa-cloud-sun text-orange-500', color: 'bg-orange-50 border-orange-200 hover:border-orange-400', key: 'moments' },
+                    { id: 'module_clock', title: '3. Quelle heure est-il ?', desc: 'Apprends à lire l\'heure', icon: 'fa-clock text-purple-500', color: 'bg-purple-50 border-purple-200 hover:border-purple-400', key: 'clock' },
+                    { id: 'module_reading', title: '4. Mon beau jour', desc: 'Lis et comprends l\'histoire', icon: 'fa-book-open text-emerald-500', color: 'bg-emerald-50 border-emerald-200 hover:border-emerald-400', key: 'reading' },
+                    { id: 'module_builder', title: '5. Construis ta phrase', desc: 'Remets les mots en ordre', icon: 'fa-star text-yellow-500', color: 'bg-yellow-50 border-yellow-200 hover:border-yellow-400', key: 'builder' },
+                    { id: 'module_final', title: '6. Défi final !', desc: 'Raconte-nous ta journée', icon: 'fa-trophy text-rose-500', color: 'bg-rose-50 border-rose-200 hover:border-rose-400', key: 'final' }
+                ];
+
+                const completedCount = Object.values(this.state.progress).filter(p => p.completed).length;
+                const progressPercent = Math.round((completedCount / modules.length) * 100);
+
+                let html = `
+                <div class="space-y-8 animate-fade-in">
+                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 text-center">
+                        <h2 class="text-2xl font-bold mb-4">Ta progression</h2>
+                        <div class="w-full bg-gray-200 rounded-full h-6 mb-2 overflow-hidden">
+                            <div class="bg-emerald-500 h-6 rounded-full transition-all duration-1000 ease-out flex items-center justify-center text-xs text-white font-bold" style="width: ${progressPercent}%">
+                                ${progressPercent > 5 ? progressPercent + '%' : ''}
+                            </div>
+                        </div>
+                        <p class="text-gray-600">Tu as terminé ${completedCount} module(s) sur ${modules.length}. Continue comme ça !</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                `;
+
+                modules.forEach(mod => {
+                    const isCompleted = this.state.progress[mod.key].completed;
+                    const ring = isCompleted ? 'ring-4 ring-emerald-400 ring-opacity-50' : '';
+                    html += `
+                        <button onclick="App.startModule('${mod.id}')" class="relative flex flex-col items-center justify-center p-8 rounded-3xl border-2 transition-all card-hover text-center ${mod.color} ${ring}">
+                            ${isCompleted ? `<div class="absolute top-4 right-4 bg-emerald-500 text-white rounded-full p-1 shadow-md w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-check"></i></div>` : ''}
+                            <div class="mb-4 bg-white p-4 rounded-2xl shadow-sm">
+                                <i class="fa-solid ${mod.icon} text-3xl"></i>
+                            </div>
+                            <h3 class="font-bold text-lg mb-2">${mod.title}</h3>
+                            <p class="text-gray-600 text-sm">${mod.desc}</p>
+                        </button>
+                    `;
+                });
+
+                html += `
+                    </div>
+                    <div class="text-center pt-8">
+                        <button onclick="App.resetProgress()" class="text-sm text-gray-400 hover:text-red-500 underline">
+                            Recommencer à zéro (effacer ma progression)
+                        </button>
+                    </div>
+                </div>`;
+                return html;
+            },
+
+            // --- MODULE 1 : VOCABULAIRE ---
+            vocabToggleFr() {
+                this.state.mod.showFr = !this.state.mod.showFr;
+                this.render();
+            },
+            vocabNext() {
+                this.state.mod.showFr = false;
+                if (this.state.mod.index < VOCABULARY.length - 1) {
+                    this.state.mod.index++;
+                    this.render();
+                } else {
+                    this.state.mod.completed = true;
+                    this.updateProgress('vocab', 100);
+                    this.render();
+                }
+            },
+            renderVocab() {
+                if (this.state.mod.completed) return this.renderModuleContainer("Découverte des mots", this.renderSuccess(100, "Bravo ! Tu as découvert tous les mots."));
+                
+                const currentWord = VOCABULARY[this.state.mod.index];
+                const progress = ((this.state.mod.index) / VOCABULARY.length) * 100;
+                
+                let content = `
+                <div class="flex flex-col items-center max-w-lg mx-auto">
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-8">
+                        <div class="bg-blue-500 h-2 rounded-full transition-all" style="width: ${progress}%"></div>
+                    </div>
+                    
+                    <div onclick="App.vocabToggleFr()" class="w-full aspect-square md:aspect-video bg-white rounded-3xl shadow-lg border-2 border-blue-100 flex flex-col items-center justify-center p-8 relative cursor-pointer select-none">
+                        <button onclick="event.stopPropagation(); speakArabic('${currentWord.ar}')" class="absolute top-4 left-4 bg-blue-100 hover:bg-blue-200 p-3 rounded-full text-blue-700 transition-colors">
+                            <i class="fa-solid fa-volume-high"></i>
+                        </button>
+                        <div class="text-6xl mb-6">${currentWord.icon}</div>
+                        <div class="text-center">
+                            <h2 class="arabic-text text-5xl md:text-6xl font-bold text-blue-900 mb-6 leading-relaxed">
+                                ${currentWord.ar}
+                            </h2>
+                            <div class="h-12 transition-all duration-300 ${this.state.mod.showFr ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}">
+                                <p class="text-xl font-bold text-gray-600 bg-gray-100 px-6 py-2 rounded-full">${currentWord.fr}</p>
+                            </div>
+                        </div>
+                        ${!this.state.mod.showFr ? `<p class="absolute bottom-4 text-sm text-gray-400">Clique sur la carte pour voir la traduction</p>` : ''}
+                    </div>
+
+                    <button onclick="App.vocabNext()" class="mt-8 bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-12 rounded-full shadow-lg text-lg flex items-center gap-2 transition-all transform hover:scale-105">
+                        ${this.state.mod.index < VOCABULARY.length - 1 ? 'Mot suivant <i class="fa-solid fa-arrow-right"></i>' : 'Terminer <i class="fa-solid fa-check"></i>'}
+                    </button>
+                </div>`;
+                return this.renderModuleContainer("Découverte des mots", content);
+            },
+
+            // --- MODULE 2 : MOMENTS ---
+            momentsSelect(momentId) {
+                if (this.state.mod.feedback !== null) return;
+
+                const currentActivity = this.state.mod.activities[this.state.mod.index];
+                const isCorrect = currentActivity.moment === momentId;
+                
+                if (isCorrect) {
+                    this.state.mod.score++;
+                    this.state.mod.feedback = 'correct';
+                    speakArabic(this.getMomentAr(momentId));
+                } else {
+                    this.state.mod.feedback = 'incorrect';
+                }
+                this.render();
+
+                setTimeout(() => {
+                    this.state.mod.feedback = null;
+                    if (this.state.mod.index < this.state.mod.activities.length - 1) {
+                        this.state.mod.index++;
+                    } else {
+                        const finalScore = Math.round((this.state.mod.score / this.state.mod.activities.length) * 100);
+                        this.state.mod.completed = true;
+                        this.updateProgress('moments', finalScore);
+                    }
+                    this.render();
+                }, 1500);
+            },
+            getMomentAr(id) {
+                const map = { 'matin': 'فِي الصَّبَاحِ', 'apres-midi': 'بَعْدَ الظُّهْرِ', 'soir': 'فِي الْمَسَاءِ', 'nuit': 'فِي اللَّيْلِ' };
+                return map[id];
+            },
+            renderMoments() {
+                if (this.state.mod.completed) return this.renderModuleContainer("Les moments de la journée", this.renderSuccess(this.state.mod.score, "Activité terminée !"));
+
+                const currentActivity = this.state.mod.activities[this.state.mod.index];
+                const fb = this.state.mod.feedback;
+
+                let feedbackHtml = '';
+                if (fb) {
+                    feedbackHtml = `
+                    <div class="absolute inset-0 flex items-center justify-center rounded-3xl bg-white bg-opacity-90 z-10">
+                        ${fb === 'correct' 
+                            ? `<div class="text-emerald-500 flex flex-col items-center animate-bounce-short"><i class="fa-solid fa-check text-6xl"></i><span class="text-2xl font-bold mt-2">Excellent !</span></div>` 
+                            : `<div class="text-red-500 flex flex-col items-center"><i class="fa-solid fa-xmark text-6xl"></i><span class="text-xl font-bold mt-2">Ce n'est pas tout à fait ça.</span></div>`}
+                    </div>`;
+                }
+
+                const moments = [
+                    { id: 'matin', label: 'Le matin', ar: 'فِي الصَّبَاحِ', icon: 'fa-cloud-sun', color: 'bg-yellow-100 border-yellow-300 text-yellow-800' },
+                    { id: 'apres-midi', label: 'L\'après-midi', ar: 'بَعْدَ الظُّهْرِ', icon: 'fa-sun', color: 'bg-orange-100 border-orange-300 text-orange-800' },
+                    { id: 'soir', label: 'Le soir', ar: 'فِي الْمَسَاءِ', icon: 'fa-moon', color: 'bg-indigo-100 border-indigo-300 text-indigo-800' },
+                    { id: 'nuit', label: 'La nuit', ar: 'فِي اللَّيْلِ', icon: 'fa-star-and-crescent', color: 'bg-slate-800 text-white border-slate-600' }
+                ];
+
+                let btnsHtml = moments.map(m => `
+                    <button onclick="App.momentsSelect('${m.id}')" class="p-6 rounded-2xl border-2 flex flex-col items-center justify-center gap-3 transition-transform hover:scale-105 ${m.color}">
+                        <i class="fa-solid ${m.icon} text-2xl"></i>
+                        <span class="arabic-text text-2xl font-bold block leading-none">${m.ar}</span>
+                        <span class="text-sm font-bold opacity-80">${m.label}</span>
+                    </button>
+                `).join('');
+
+                let content = `
+                <div class="flex flex-col items-center">
+                    <p class="text-xl text-gray-700 mb-8 font-bold text-center">À quel moment de la journée fais-tu cette activité ?</p>
+                    
+                    <div class="bg-white p-8 rounded-3xl shadow-md border-2 border-gray-100 mb-10 text-center w-full max-w-md relative select-none">
+                        <div class="text-5xl mb-4">${currentActivity.icon}</div>
+                        <h3 class="arabic-text text-4xl font-bold text-gray-800 mb-2">${currentActivity.ar}</h3>
+                        <p class="text-gray-500 font-bold">${currentActivity.fr}</p>
+                        ${feedbackHtml}
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+                        ${btnsHtml}
+                    </div>
+                    
+                    <div class="mt-8 text-gray-400 font-bold">
+                        Activité ${this.state.mod.index + 1} sur ${this.state.mod.activities.length}
+                    </div>
+                </div>`;
+
+                return this.renderModuleContainer("Les moments de la journée", content);
+            },
+
+            // --- MODULE 3 : HORLOGE ---
+            generateClockOptions() {
+                const correct = this.state.mod.questions[this.state.mod.index];
+                let opts = [correct];
+                while(opts.length < 3) {
+                    const rand = this.state.mod.times[Math.floor(Math.random() * this.state.mod.times.length)];
+                    if(!opts.find(o => o.hour === rand.hour)) opts.push(rand);
+                }
+                this.state.mod.options = shuffleArray(opts);
+            },
+            clockAnswer(hourClicked) {
+                if(this.state.mod.feedback !== null) return;
+                
+                const currentQ = this.state.mod.questions[this.state.mod.index];
+                const selected = this.state.mod.options.find(o => o.hour === hourClicked);
+                
+                if(hourClicked === currentQ.hour) {
+                    this.state.mod.score++;
+                    this.state.mod.feedback = { type: 'correct', msg: "Bravo ! C'est la bonne heure." };
+                    speakArabic(selected.ar);
+                } else {
+                    this.state.mod.feedback = { type: 'incorrect', msg: `Oups ! C'était ${currentQ.fr}.` };
+                }
+                this.render();
+
+                setTimeout(() => {
+                    this.state.mod.feedback = null;
+                    if (this.state.mod.index < this.state.mod.questions.length - 1) {
+                        this.state.mod.index++;
+                        this.generateClockOptions();
+                    } else {
+                        this.state.mod.completed = true;
+                        this.updateProgress('clock', Math.round((this.state.mod.score / this.state.mod.questions.length) * 100));
+                    }
+                    this.render();
+                }, 2000); // 2 secondes de délai (corrigé)
+            },
+            renderClockFace(hour) {
+                const hourAngle = (hour % 12) * 30;
+                let lines = '';
+                for(let i=0; i<12; i++) {
+                    lines += `<line x1="50" y1="10" x2="50" y2="15" stroke="#ccc" stroke-width="2" transform="rotate(${i * 30} 50 50)" />`;
+                }
+                return `
+                <svg viewBox="0 0 100 100" class="w-48 h-48 drop-shadow-xl mx-auto">
+                    <circle cx="50" cy="50" r="48" fill="white" stroke="#8b5cf6" stroke-width="4" />
+                    <circle cx="50" cy="50" r="3" fill="#8b5cf6" />
+                    ${lines}
+                    <line x1="50" y1="50" x2="50" y2="15" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round" />
+                    <line x1="50" y1="50" x2="50" y2="28" stroke="#8b5cf6" stroke-width="5" stroke-linecap="round" transform="rotate(${hourAngle} 50 50)" />
+                </svg>`;
+            },
+            renderClock() {
+                if (this.state.mod.completed) return this.renderModuleContainer("Quelle heure est-il ?", this.renderSuccess(this.state.mod.score, "Tu sais lire l'heure en arabe !"));
+
+                const currentQ = this.state.mod.questions[this.state.mod.index];
+                const fb = this.state.mod.feedback;
+
+                let fbHtml = '';
+                if(fb) {
+                    fbHtml = `
+                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-6 py-3 rounded-full text-white font-bold whitespace-nowrap z-10 shadow-lg ${fb.type === 'correct' ? 'bg-emerald-500' : 'bg-red-500'}">
+                        ${fb.msg}
+                    </div>`;
+                }
+
+                let optsHtml = this.state.mod.options.map(opt => `
+                    <button onclick="App.clockAnswer(${opt.hour})" class="bg-white border-2 border-purple-200 hover:border-purple-500 hover:bg-purple-50 p-4 rounded-2xl transition-all flex flex-col items-center justify-center gap-2 min-h-[100px]">
+                        <span class="arabic-text text-2xl font-bold text-purple-900 leading-none">${opt.ar}</span>
+                    </button>
+                `).join('');
+
+                let content = `
+                <div class="flex flex-col items-center">
+                    <div class="flex items-center gap-4 mb-8 bg-purple-100 text-purple-800 px-6 py-3 rounded-2xl font-bold">
+                        <span class="arabic-text text-3xl">كَمِ السَّاعَةُ؟</span>
+                    </div>
+                    <div class="mb-12 relative w-full text-center">
+                        ${this.renderClockFace(currentQ.hour)}
+                        ${fbHtml}
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-3xl">
+                        ${optsHtml}
+                    </div>
+                </div>`;
+
+                return this.renderModuleContainer("Quelle heure est-il ?", content);
+            },
+
+            // --- MODULE 4 : LECTURE ---
+            readingDone() {
+                this.state.mod.showQuestion = true;
+                this.render();
+            },
+            readingAnswer(optIndex) {
+                if (this.state.mod.feedback !== null) return;
+
+                const q = STORY[this.state.mod.index].questions[0];
+                if (optIndex === q.correct) {
+                    this.state.mod.score++;
+                    this.state.mod.feedback = 'correct';
+                } else {
+                    this.state.mod.feedback = 'incorrect';
+                }
+                this.render();
+
+                setTimeout(() => {
+                    this.state.mod.feedback = null;
+                    this.state.mod.showQuestion = false;
+                    if (this.state.mod.index < STORY.length - 1) {
+                        this.state.mod.index++;
+                    } else {
+                        this.state.mod.completed = true;
+                        this.updateProgress('reading', 100);
+                    }
+                    this.render();
+                }, 2000);
+            },
+            renderReading() {
+                if (this.state.mod.completed) return this.renderModuleContainer("Lecture : Mon beau jour", this.renderSuccess(100, "Félicitations, tu as bien lu toute l'histoire !"));
+
+                const p = STORY[this.state.mod.index];
+                const q = p.questions[0];
+                const fb = this.state.mod.feedback;
+
+                // On s'assure d'utiliser Noto Naskh Arabic, grand et gras (réponse à la requête #2)
+                let textBlock = `
+                <div class="bg-white p-8 rounded-3xl shadow-lg border-2 border-emerald-100 mb-8 relative">
+                    <h2 class="arabic-text text-3xl font-bold text-emerald-700 mb-6 border-b-2 border-emerald-50 pb-4">${p.title}</h2>
+                    <p class="arabic-text text-4xl md:text-5xl leading-loose text-gray-900 font-extrabold" style="line-height: 2.5;">
+                        ${p.text}
+                    </p>
+                    <button onclick="speakArabic('${p.text}')" class="absolute -right-4 -top-4 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 p-4 rounded-full shadow-md" title="Écouter le texte">
+                        <i class="fa-solid fa-volume-high text-xl"></i>
+                    </button>
+                </div>`;
+
+                let interactiveBlock = '';
+                if (!this.state.mod.showQuestion) {
+                    interactiveBlock = `
+                    <div class="text-center">
+                        <button onclick="App.readingDone()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-8 rounded-full shadow-md text-lg inline-flex items-center gap-2">
+                            J'ai lu et compris <i class="fa-solid fa-check"></i>
+                        </button>
+                    </div>`;
+                } else {
+                    let optsHtml = q.options.map((opt, idx) => `
+                        <button onclick="App.readingAnswer(${idx})" class="bg-white p-4 rounded-xl text-right arabic-text text-3xl font-bold text-gray-800 border-2 border-transparent hover:border-blue-300 transition-colors w-full">
+                            ${opt}
+                        </button>
+                    `).join('');
+
+                    let fbOverlay = '';
+                    if (fb) {
+                        fbOverlay = `
+                        <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center rounded-2xl bg-white bg-opacity-95 ${fb === 'correct' ? 'text-emerald-500' : 'text-red-500'}">
+                            ${fb === 'correct' ? '<i class="fa-solid fa-check text-5xl mr-4"></i> <span class="font-bold text-3xl">Vrai !</span>' : '<i class="fa-solid fa-xmark text-5xl mr-4"></i> <span class="font-bold text-3xl">Faux, relis bien.</span>'}
+                        </div>`;
+                    }
+
+                    interactiveBlock = `
+                    <div class="bg-blue-50 p-6 md:p-8 rounded-2xl border-2 border-blue-200 animate-fade-in relative">
+                        <h3 class="text-lg font-bold text-blue-900 mb-6 arabic-text text-right text-4xl">${q.q}</h3>
+                        <p class="text-sm text-gray-500 mb-4 font-bold text-right w-full" dir="rtl">Choisis la bonne réponse :</p>
+                        <div class="flex flex-col gap-4">
+                            ${optsHtml}
+                        </div>
+                        ${fbOverlay}
+                    </div>`;
+                }
+
+                let content = `
+                <div class="max-w-3xl mx-auto">
+                    ${textBlock}
+                    ${interactiveBlock}
+                </div>`;
+
+                return this.renderModuleContainer("Lecture : Mon beau jour", content);
+            },
+
+            // --- MODULE 5 : BUILDER ---
+            setupBuilderSentence() {
+                const currentSentence = SENTENCES_TO_BUILD[this.state.mod.index];
+                this.state.mod.availableWords = shuffleArray(currentSentence.words);
+                this.state.mod.selectedWords = [];
+                this.state.mod.feedback = null;
+            },
+            builderSelectWord(wordStr, fromAvailable) {
+                if (this.state.mod.feedback !== null) return;
+                
+                // En HTML natif on utilise des chaînes, on filtre par valeur stricte (peut causer des bugs si doublons, mais ici mots uniques)
+                if (fromAvailable) {
+                    this.state.mod.availableWords = this.state.mod.availableWords.filter(w => w !== wordStr);
+                    this.state.mod.selectedWords.push(wordStr);
+                    speakArabic(wordStr);
+                } else {
+                    this.state.mod.selectedWords = this.state.mod.selectedWords.filter(w => w !== wordStr);
+                    this.state.mod.availableWords.push(wordStr);
+                }
+                this.render();
+            },
+            builderCheck() {
+                const currentSentence = SENTENCES_TO_BUILD[this.state.mod.index];
+                const isCorrect = this.state.mod.selectedWords.join(' ') === currentSentence.words.join(' ');
+                
+                if (isCorrect) {
+                    this.state.mod.feedback = 'correct';
+                    speakArabic(currentSentence.words.join(' '));
+                    this.render();
+                    setTimeout(() => {
+                        if (this.state.mod.index < SENTENCES_TO_BUILD.length - 1) {
+                            this.state.mod.index++;
+                            this.setupBuilderSentence();
+                        } else {
+                            this.state.mod.completed = true;
+                            this.updateProgress('builder', 100);
+                        }
+                        this.render();
+                    }, 2500);
+                } else {
+                    this.state.mod.feedback = 'incorrect';
+                    this.render();
+                    setTimeout(() => {
+                        this.setupBuilderSentence();
+                        this.render();
+                    }, 2000);
+                }
+            },
+            renderBuilder() {
+                if (this.state.mod.completed) return this.renderModuleContainer("Construis la phrase", this.renderSuccess(100, "Bravo ! Tu sais construire des phrases en arabe."));
+
+                const currentSentence = SENTENCES_TO_BUILD[this.state.mod.index];
+                const fb = this.state.mod.feedback;
+
+                let selectedHtml = this.state.mod.selectedWords.map(w => `
+                    <button onclick="App.builderSelectWord('${w}', false)" class="bg-blue-100 text-blue-900 px-6 py-3 rounded-xl arabic-text text-3xl font-bold hover:bg-red-100 transition-colors shadow-sm cursor-pointer">
+                        ${w}
+                    </button>
+                `).join('');
+
+                let availableHtml = this.state.mod.availableWords.map(w => `
+                    <button onclick="App.builderSelectWord('${w}', true)" class="bg-white border-2 border-gray-200 text-gray-800 px-6 py-3 rounded-xl arabic-text text-3xl font-bold hover:border-blue-400 hover:bg-blue-50 transition-colors shadow-sm cursor-pointer">
+                        ${w}
+                    </button>
+                `).join('');
+
+                let fbOverlay = '';
+                if(fb) {
+                    fbOverlay = `
+                    <div class="absolute inset-0 flex items-center justify-center rounded-2xl bg-white bg-opacity-95 ${fb === 'correct' ? 'text-emerald-500' : 'text-red-500'} z-10">
+                        <span class="font-bold text-3xl">${fb === 'correct' ? 'Excellente phrase !' : 'Essaie encore...'}</span>
+                    </div>`;
+                }
+
+                let btnCheck = '';
+                if (this.state.mod.selectedWords.length === currentSentence.words.length && fb === null) {
+                    btnCheck = `
+                    <button onclick="App.builderCheck()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-12 rounded-full shadow-lg text-xl animate-bounce-short mt-8">
+                        Vérifier <i class="fa-solid fa-check ml-2"></i>
+                    </button>`;
+                }
+
+                let content = `
+                <div class="max-w-3xl mx-auto flex flex-col items-center">
+                    <div class="bg-yellow-50 px-6 py-4 rounded-2xl mb-8 w-full text-center border border-yellow-200">
+                        <h3 class="font-bold text-gray-700 text-lg">Traduis cette phrase en mettant les mots dans l'ordre (de droite à gauche) :</h3>
+                        <p class="text-2xl font-bold text-yellow-800 mt-2">${currentSentence.fr}</p>
+                    </div>
+
+                    <!-- Zone de réponse -->
+                    <div class="w-full min-h-[120px] bg-white border-2 border-dashed border-gray-300 rounded-2xl p-6 mb-8 flex flex-row-reverse flex-wrap gap-4 items-center justify-center relative">
+                        ${this.state.mod.selectedWords.length === 0 ? '<span class="text-gray-400 absolute font-bold">Clique sur les mots en bas...</span>' : ''}
+                        ${selectedHtml}
+                        ${fbOverlay}
+                    </div>
+
+                    <!-- Mots disponibles -->
+                    <div class="w-full flex flex-row-reverse flex-wrap gap-4 justify-center mb-8">
+                        ${availableHtml}
+                    </div>
+
+                    ${btnCheck}
+                </div>`;
+
+                return this.renderModuleContainer("Construis la phrase", content);
+            },
+
+            // --- MODULE 6 : DÉFI FINAL ---
+            finalNext() {
+                const challengesLen = 4;
+                if (this.state.mod.index < challengesLen - 1) {
+                    this.state.mod.index++;
+                    this.render();
+                } else {
+                    this.state.mod.completed = true;
+                    this.updateProgress('final', 100);
+                    this.render();
+                }
+            },
+            renderFinal() {
+                if (this.state.mod.completed) return this.renderModuleContainer("Défi final : Raconte ta journée !", this.renderSuccess(100, "Félicitations ! Tu es maintenant capable de raconter ta journée en arabe. 🎉"));
+
+                const challenges = [
+                    { title: 'Le matin', ar: 'فِي الصَّبَاحِ...', icon: 'fa-cloud-sun text-yellow-500', hint: 'أَسْتَيْقِظُ، أَغْسِلُ، أَتَنَاوَلُ، أَذْهَبُ...' },
+                    { title: 'L\'après-midi', ar: 'بَعْدَ الظُّهْرِ...', icon: 'fa-sun text-orange-500', hint: 'أَرْجِعُ، أَتَغَدَّى، أَلْعَبُ...' },
+                    { title: 'Le soir', ar: 'فِي الْمَسَاءِ...', icon: 'fa-moon text-indigo-500', hint: 'أُشَاهِدُ، أَقْرَأُ، أَتَنَاوَلُ الْعَشَاءَ...' },
+                    { title: 'La nuit', ar: 'فِي اللَّيْلِ...', icon: 'fa-star-and-crescent text-slate-700', hint: 'أَغْسِلُ أَسْنَانِي، أَنَامُ...' }
+                ];
+                const currentC = challenges[this.state.mod.index];
+
+                let content = `
+                <div class="max-w-2xl mx-auto text-center">
+                    <p class="text-xl text-gray-700 mb-8 font-bold">Dis à voix haute ce que tu fais à ce moment de la journée. Utilise les mots que tu as appris.</p>
+                    
+                    <div class="bg-white p-10 rounded-3xl shadow-xl border-t-8 border-rose-400 mb-8 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-rose-50 to-transparent opacity-50"></div>
+                        <div class="flex justify-center mb-6 relative z-10"><i class="fa-solid ${currentC.icon} text-6xl"></i></div>
+                        
+                        <h2 class="arabic-text text-5xl font-bold text-gray-800 mb-4 relative z-10">${currentC.ar}</h2>
+                        <h3 class="text-xl font-bold text-gray-400 mb-8 relative z-10">${currentC.title}</h3>
+                        
+                        <div class="bg-blue-50 p-6 rounded-xl relative z-10 inline-block w-full">
+                            <span class="text-sm font-bold text-blue-800 block mb-4">Mots pour t'aider :</span>
+                            <span class="arabic-text text-4xl font-bold text-blue-600 block leading-loose">${currentC.hint}</span>
+                        </div>
+                    </div>
+
+                    <button onclick="App.finalNext()" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 px-12 rounded-full shadow-lg text-lg transition-transform hover:scale-105">
+                        ${this.state.mod.index < challenges.length - 1 ? 'J\'ai fini pour ce moment' : 'J\'ai terminé mon histoire !'}
+                    </button>
+                </div>`;
+
+                return this.renderModuleContainer("Défi final : Raconte ta journée !", content);
+            }
+        };
+
+        // Lancement de l'application
+        window.addEventListener('DOMContentLoaded', () => {
+            App.init();
+        });
+
+    </script>
+</body>
+</html>
